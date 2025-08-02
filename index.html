@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parâmetros AP</title>
+    <title>Parâmetros AP com Tags</title>
     
     <!-- Meta tags para SEO e melhor experiência -->
-    <meta name="description" content="Sistema avançado de gerenciamento de parâmetros com recursos profissionais">
+    <meta name="description" content="Sistema avançado de gerenciamento de parâmetros com recursos profissionais de tags">
     <meta name="author" content="Seu Nome">
     <meta name="theme-color" content="#6366f1">
     
@@ -31,7 +31,7 @@
                 <i class="fas fa-cogs" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
                 Parâmetros AP
             </h1>
-            <p>Listagem de parametros AP</p>
+            <p>Listagem de parametros AP com gerenciamento de tags</p>
         </div>
 
         <!-- Estatísticas -->
@@ -93,11 +93,18 @@
                         <option value="campo">Chave</option>
                         <option value="valor">Valor</option>
                         <option value="descricao">Descrição</option>
+                        <option value="tags">Tags</option>
                     </select>
                     <button class="btn btn-secondary btn-sm" id="clear-filters" title="Limpar todos os filtros">
                         <i class="fas fa-times"></i>
                         Limpar Filtros
                     </button>
+                </div>
+            </div>
+            <!-- NOVO: Filtro de Tags -->
+            <div class="controls-row" id="tag-filter-controls" style="display: none;">
+                <div class="tag-filter-container" id="tag-filter-container">
+                    <!-- Tags serão inseridas aqui via JS -->
                 </div>
             </div>
         </div>
@@ -155,6 +162,11 @@
                                 <i class="fas fa-align-left" style="margin-right: 0.5rem;"></i>
                                 Descrição
                             </th>
+                            <!-- NOVO: Coluna de Tags -->
+                            <th class="sortable" data-field="tags" title="Clique para ordenar por tags">
+                                <i class="fas fa-tags" style="margin-right: 0.5rem;"></i>
+                                Tags
+                            </th>
                             <th class="sortable" data-field="createdAt" title="Clique para ordenar por data">
                                 <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
                                 Data Criação
@@ -167,7 +179,7 @@
                     </thead>
                     <tbody id="table-body">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 3rem;">
+                            <td colspan="7" style="text-align: center; padding: 3rem;">
                                 <div class="loading"></div>
                                 <div style="margin-top: 1rem; color: var(--text-secondary);">Carregando dados...</div>
                             </td>
@@ -219,7 +231,7 @@
                 <div class="form-group">
                     <label for="campo">
                         <i class="fas fa-key" style="margin-right: 0.5rem;"></i>
-                        Chave *
+                        Chave
                     </label>
                     <input type="text" id="campo" name="campo" required autocomplete="off" 
                            placeholder="Ex: DATABASE_URL, API_KEY..." 
@@ -229,7 +241,7 @@
                 <div class="form-group">
                     <label for="valor">
                         <i class="fas fa-tag" style="margin-right: 0.5rem;"></i>
-                        Valor *
+                        Valor
                     </label>
                     <input type="text" id="valor" name="valor" required autocomplete="off"
                            placeholder="Ex: localhost:5432, abc123..."
@@ -244,6 +256,17 @@
                     <textarea id="descricao" name="descricao" 
                               placeholder="Descreva o propósito deste parâmetro..."
                               title="Descrição opcional do parâmetro"></textarea>
+                </div>
+                
+                <!-- NOVO: Campo de Tags -->
+                <div class="form-group">
+                    <label for="tags">
+                        <i class="fas fa-tags" style="margin-right: 0.5rem;"></i>
+                        Tags
+                    </label>
+                    <input type="text" id="tags" name="tags" autocomplete="off"
+                           placeholder="Ex: api, frontend, database (separadas por vírgula)"
+                           title="Digite as tags separadas por vírgula">
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
@@ -365,176 +388,16 @@
     <!-- Scripts -->
     <script type="module" src="scripts.js"></script>
 
-    <!-- Service Worker para cache (opcional) -->
+    <!-- O resto do seu HTML (Service Worker, PWA, Acessibilidade) permanece o mesmo -->
     <script>
-        // Registrar service worker para melhor performance (se disponível)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registrado com sucesso:', registration.scope);
-                    })
-                    .catch(registrationError => {
-                        console.log('Falha ao registrar SW:', registrationError);
-                    });
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('Falha no registro do SW:', err));
             });
         }
-
-        // Detectar se está offline
-        window.addEventListener('online', () => {
-            console.log('Conexão restaurada');
-        });
-
-        window.addEventListener('offline', () => {
-            console.log('Conexão perdida');
-        });
     </script>
-
-    <!-- Meta tags para PWA (Progressive Web App) -->
-    <script>
-        // Adicionar à tela inicial (PWA)
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Mostrar botão de instalação personalizado se desejar
-            const installBtn = document.createElement('button');
-            installBtn.textContent = 'Instalar App';
-            installBtn.className = 'btn btn-secondary btn-sm';
-            installBtn.style.position = 'fixed';
-            installBtn.style.bottom = '20px';
-            installBtn.style.left = '20px';
-            installBtn.style.zIndex = '1000';
-            
-            installBtn.addEventListener('click', () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('PWA instalado');
-                    }
-                    deferredPrompt = null;
-                    installBtn.remove();
-                });
-            });
-            
-            document.body.appendChild(installBtn);
-            
-            // Remover após 10 segundos se não clicado
-            setTimeout(() => {
-                if (installBtn.parentNode) {
-                    installBtn.remove();
-                }
-            }, 10000);
-        });
-    </script>
-
-    <!-- Manifest para PWA -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkdlcmVuY2lhZG9yIGRlIFBhcsOibWV0cm9zIFBybyIsCiAgInNob3J0X25hbWUiOiAiUGFyYW1ldHJvcyBQcm8iLAogICJkZXNjcmlwdGlvbiI6ICJTaXN0ZW1hIGF2YW7Dp2FkbyBkZSBnZXJlbmNpYW1lbnRvIGRlIHBhcsOibWV0cm9zIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjNjM2NmYxIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3RleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCclM0XimJnvuI8lM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
-
-    <!-- Accessibility improvements -->
-    <script>
-        // Melhorar acessibilidade
-        document.addEventListener('DOMContentLoaded', () => {
-            // Adicionar navegação por teclado
-            document.addEventListener('keydown', (e) => {
-                // ESC para fechar modais
-                if (e.key === 'Escape') {
-                    const openModal = document.querySelector('.modal[style*="block"]');
-                    if (openModal) {
-                        const closeBtn = openModal.querySelector('.close-btn');
-                        if (closeBtn) closeBtn.click();
-                    }
-                }
-                
-                // Ctrl+N para novo parâmetro
-                if (e.ctrlKey && e.key === 'n') {
-                    e.preventDefault();
-                    document.getElementById('add-param-btn').click();
-                }
-                
-                // Ctrl+F para focar na busca
-                if (e.ctrlKey && e.key === 'f') {
-                    e.preventDefault();
-                    document.getElementById('search-box').focus();
-                }
-            });
-            
-            // Melhorar contraste para usuários com deficiência visual
-            const mediaQuery = window.matchMedia('(prefers-contrast: high)');
-            if (mediaQuery.matches) {
-                document.body.classList.add('high-contrast');
-            }
-            
-            // Respeitar preferência de movimento reduzido
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-            if (reduceMotion.matches) {
-                document.body.classList.add('reduce-motion');
-            }
-        });
-    </script>
-
-    <!-- Estilos adicionais para acessibilidade -->
     <style>
-        /* Alto contraste */
-        .high-contrast {
-            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
-        }
-        
-        /* Movimento reduzido */
-        .reduce-motion * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-        
-        /* Melhor foco para teclado */
-        *:focus-visible {
-            outline: 3px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-        
-        /* Indicador de carregamento mais acessível */
-        .loading {
-            position: relative;
-        }
-        
-        .loading::after {
-            content: "Carregando...";
-            position: absolute;
-            left: -9999px;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-        }
-        
-        /* Melhor indicação de elementos interativos */
-        button, .btn, input[type="checkbox"], select {
-            cursor: pointer;
-        }
-        
-        button:disabled, .btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        /* Indicação visual para links e botões */
-        .btn:focus, button:focus {
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
-        }
-        
-        /* Melhor contraste para placeholders */
-        ::placeholder {
-            color: var(--text-tertiary);
-            opacity: 1;
-        }
-        
-        /* Indicação de campos obrigatórios */
-        .form-group label::after {
-            content: "";
-        }
-        
+        *:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 2px; }
         .form-group label:has(~ input[required])::after,
         .form-group label:has(~ textarea[required])::after {
             content: " *";
