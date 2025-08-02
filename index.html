@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros AP</title>
+    
+    <!-- Meta tags para SEO e melhor experiência -->
+    <meta name="description" content="Sistema avançado de gerenciamento de parâmetros com recursos profissionais">
+    <meta name="author" content="Seu Nome">
+    <meta name="theme-color" content="#6366f1">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚙️%3C/text%3E%3C/svg%3E">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Preload da fonte para melhor performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body data-theme="light">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-cogs" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
+                Parâmetros AP
+            </h1>
+            <p>Listagem de parametros AP</p>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="icon"><i class="fas fa-database"></i></div>
+                <div class="value" id="total-params">-</div>
+                <div class="label">Total de Parâmetros</div>
+            </div>
+            <div class="stat-card today">
+                <div class="icon"><i class="fas fa-plus"></i></div>
+                <div class="value" id="today-params">-</div>
+                <div class="label">Adicionados Hoje</div>
+            </div>
+            <div class="stat-card week">
+                <div class="icon"><i class="fas fa-chart-line"></i></div>
+                <div class="value" id="week-params">-</div>
+                <div class="label">Esta Semana</div>
+            </div>
+            <div class="stat-card month">
+                <div class="icon"><i class="fas fa-calendar"></i></div>
+                <div class="value" id="month-params">-</div>
+                <div class="label">Este Mês</div>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <div class="controls-row">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-box" placeholder="Buscar por chave, valor ou descrição..." autocomplete="off">
+                </div>
+                <button class="btn btn-primary" id="add-param-btn" title="Adicionar novo parâmetro">
+                    <i class="fas fa-plus"></i>
+                    Novo Parâmetro
+                </button>
+                <button class="btn btn-secondary" id="export-btn" title="Exportar dados">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+                <button class="btn btn-secondary" id="import-btn" title="Importar dados">
+                    <i class="fas fa-upload"></i>
+                    Importar
+                </button>
+                <button class="btn btn-secondary" id="history-btn" title="Ver histórico de ações">
+                    <i class="fas fa-history"></i>
+                    Histórico
+                </button>
+                <div class="theme-toggle" id="theme-toggle" title="Alternar tema">
+                    <i class="fas fa-sun theme-icon sun"></i>
+                    <i class="fas fa-moon theme-icon moon"></i>
+                </div>
+            </div>
+            <div class="controls-row">
+                <div class="filters">
+                    <select class="filter-select" id="field-filter" title="Filtrar por campo específico">
+                        <option value="">Todos os campos</option>
+                        <option value="campo">Chave</option>
+                        <option value="valor">Valor</option>
+                        <option value="descricao">Descrição</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" id="clear-filters" title="Limpar todos os filtros">
+                        <i class="fas fa-times"></i>
+                        Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações em lote -->
+        <div class="bulk-actions" id="bulk-actions">
+            <div class="bulk-info">
+                <i class="fas fa-check-square" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
+                <span id="selected-count">0</span> itens selecionados
+            </div>
+            <button class="btn btn-danger btn-sm" id="bulk-delete" title="Excluir itens selecionados">
+                <i class="fas fa-trash"></i>
+                Excluir Selecionados
+            </button>
+            <button class="btn btn-secondary btn-sm" id="bulk-export" title="Exportar itens selecionados">
+                <i class="fas fa-download"></i>
+                Exportar Selecionados
+            </button>
+            <button class="btn btn-secondary btn-sm" id="deselect-all" title="Desmarcar todos os itens">
+                <i class="fas fa-times"></i>
+                Desmarcar Todos
+            </button>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-table" style="margin-right: 0.5rem;"></i>
+                    Lista de Parâmetros
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-secondary btn-sm" id="refresh-btn" title="Atualizar dados">
+                        <i class="fas fa-sync"></i>
+                        Atualizar
+                    </button>
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <input type="checkbox" id="select-all" class="row-checkbox" title="Selecionar todos">
+                            </th>
+                            <th class="sortable" data-field="campo" title="Clique para ordenar por chave">
+                                <i class="fas fa-key" style="margin-right: 0.5rem;"></i>
+                                Chave
+                            </th>
+                            <th class="sortable" data-field="valor" title="Clique para ordenar por valor">
+                                <i class="fas fa-tag" style="margin-right: 0.5rem;"></i>
+                                Valor
+                            </th>
+                            <th class="sortable" data-field="descricao" title="Clique para ordenar por descrição">
+                                <i class="fas fa-align-left" style="margin-right: 0.5rem;"></i>
+                                Descrição
+                            </th>
+                            <th class="sortable" data-field="createdAt" title="Clique para ordenar por data">
+                                <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                Data Criação
+                            </th>
+                            <th style="width: 150px;">
+                                <i class="fas fa-cog" style="margin-right: 0.5rem;"></i>
+                                Ações
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 3rem;">
+                                <div class="loading"></div>
+                                <div style="margin-top: 1rem; color: var(--text-secondary);">Carregando dados...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                <div class="pagination-info">
+                    Mostrando <span id="showing-start">0</span> a <span id="showing-end">0</span> de <span id="total-items">0</span> itens
+                </div>
+                <div class="pagination-controls">
+                    <select class="page-size-select" id="page-size" title="Itens por página">
+                        <option value="10">10 por página</option>
+                        <option value="25" selected>25 por página</option>
+                        <option value="50">50 por página</option>
+                        <option value="100">100 por página</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" id="prev-page" disabled title="Página anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="page-info">Página 1 de 1</span>
+                    <button class="btn btn-secondary btn-sm" id="next-page" disabled title="Próxima página">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Drop Zone -->
+        <div class="drop-zone" id="drop-zone" style="display: none;">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
+            <h3>Arraste um arquivo CSV aqui</h3>
+            <p>ou <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">selecione um arquivo</button></p>
+            <input type="file" id="file-input" class="file-input" accept=".csv" title="Selecionar arquivo CSV">
+        </div>
+    </div>
+
+    <!-- Modal Adicionar/Editar -->
+    <div id="param-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Adicionar Novo Parâmetro</h2>
+                <button class="close-btn" id="close-modal" title="Fechar modal" aria-label="Fechar">&times;</button>
+            </div>
+            <form id="param-form" novalidate>
+                <input type="hidden" id="doc-id" name="doc-id">
+                
+                <div class="form-group">
+                    <label for="campo">
+                        <i class="fas fa-key" style="margin-right: 0.5rem;"></i>
+                        Chave *
+                    </label>
+                    <input type="text" id="campo" name="campo" required autocomplete="off" 
+                           placeholder="Ex: DATABASE_URL, API_KEY..." 
+                           title="Digite a chave do parâmetro">
+                </div>
+
+                <div class="form-group">
+                    <label for="valor">
+                        <i class="fas fa-tag" style="margin-right: 0.5rem;"></i>
+                        Valor *
+                    </label>
+                    <input type="text" id="valor" name="valor" required autocomplete="off"
+                           placeholder="Ex: localhost:5432, abc123..."
+                           title="Digite o valor do parâmetro">
+                </div>
+
+                <div class="form-group">
+                    <label for="descricao">
+                        <i class="fas fa-align-left" style="margin-right: 0.5rem;"></i>
+                        Descrição
+                    </label>
+                    <textarea id="descricao" name="descricao" 
+                              placeholder="Descreva o propósito deste parâmetro..."
+                              title="Descrição opcional do parâmetro"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-save"></i>
+                        Salvar Parâmetro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmação -->
+    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="confirm-title" aria-modal="true">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="confirm-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--warning-color); margin-right: 0.5rem;"></i>
+                    Confirmar Ação
+                </h2>
+                <button class="close-btn" onclick="closeConfirmModal()" title="Fechar modal" aria-label="Fechar">&times;</button>
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <p id="confirm-message">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-danger" id="confirm-action">
+                    <i class="fas fa-check"></i>
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Exportar -->
+    <div id="export-modal" class="modal" role="dialog" aria-labelledby="export-title" aria-modal="true">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="export-title">
+                    <i class="fas fa-download" style="color: var(--info-color); margin-right: 0.5rem;"></i>
+                    Exportar Dados
+                </h2>
+                <button class="close-btn" onclick="closeExportModal()" title="Fechar modal" aria-label="Fechar">&times;</button>
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="export-format">
+                        <i class="fas fa-file-code" style="margin-right: 0.5rem;"></i>
+                        Formato de Exportação:
+                    </label>
+                    <select id="export-format" class="filter-select" style="width: 100%;">
+                        <option value="csv">CSV (Comma Separated Values)</option>
+                        <option value="json">JSON (JavaScript Object Notation)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="export-headers" checked>
+                        <i class="fas fa-header"></i>
+                        Incluir cabeçalhos
+                    </label>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeExportModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="do-export">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel de Histórico -->
+    <div id="history-panel" class="history-panel">
+        <div class="history-header">
+            <h3>
+                <i class="fas fa-history" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
+                Histórico de Ações
+            </h3>
+            <button class="close-btn" id="close-history" title="Fechar histórico" aria-label="Fechar">&times;</button>
+        </div>
+        <div id="history-list">
+            <div class="history-item">
+                <div class="history-action">
+                    <i class="fas fa-info-circle" style="margin-right: 0.5rem; color: var(--info-color);"></i>
+                    Nenhuma ação registrada
+                </div>
+                <div class="history-time">Inicie usando o sistema para ver o histórico</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificações -->
+    <div id="notification" class="notification" role="alert" aria-live="polite">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Ação realizada com sucesso!</span>
+    </div>
+
+    <!-- Loading overlay para operações pesadas -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(2px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+            <div class="loading" style="border-color: rgba(255,255,255,0.3); border-top-color: white; width: 40px; height: 40px;"></div>
+            <div style="margin-top: 1rem; font-size: 1.2rem;">Processando...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="scripts.js"></script>
+
+    <!-- Service Worker para cache (opcional) -->
+    <script>
+        // Registrar service worker para melhor performance (se disponível)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registrado com sucesso:', registration.scope);
+                    })
+                    .catch(registrationError => {
+                        console.log('Falha ao registrar SW:', registrationError);
+                    });
+            });
+        }
+
+        // Detectar se está offline
+        window.addEventListener('online', () => {
+            console.log('Conexão restaurada');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('Conexão perdida');
+        });
+    </script>
+
+    <!-- Meta tags para PWA (Progressive Web App) -->
+    <script>
+        // Adicionar à tela inicial (PWA)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar botão de instalação personalizado se desejar
+            const installBtn = document.createElement('button');
+            installBtn.textContent = 'Instalar App';
+            installBtn.className = 'btn btn-secondary btn-sm';
+            installBtn.style.position = 'fixed';
+            installBtn.style.bottom = '20px';
+            installBtn.style.left = '20px';
+            installBtn.style.zIndex = '1000';
+            
+            installBtn.addEventListener('click', () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWA instalado');
+                    }
+                    deferredPrompt = null;
+                    installBtn.remove();
+                });
+            });
+            
+            document.body.appendChild(installBtn);
+            
+            // Remover após 10 segundos se não clicado
+            setTimeout(() => {
+                if (installBtn.parentNode) {
+                    installBtn.remove();
+                }
+            }, 10000);
+        });
+    </script>
+
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkdlcmVuY2lhZG9yIGRlIFBhcsOibWV0cm9zIFBybyIsCiAgInNob3J0X25hbWUiOiAiUGFyYW1ldHJvcyBQcm8iLAogICJkZXNjcmlwdGlvbiI6ICJTaXN0ZW1hIGF2YW7Dp2FkbyBkZSBnZXJlbmNpYW1lbnRvIGRlIHBhcsOibWV0cm9zIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjNjM2NmYxIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3RleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCclM0XimJnvuI8lM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
+
+    <!-- Accessibility improvements -->
+    <script>
+        // Melhorar acessibilidade
+        document.addEventListener('DOMContentLoaded', () => {
+            // Adicionar navegação por teclado
+            document.addEventListener('keydown', (e) => {
+                // ESC para fechar modais
+                if (e.key === 'Escape') {
+                    const openModal = document.querySelector('.modal[style*="block"]');
+                    if (openModal) {
+                        const closeBtn = openModal.querySelector('.close-btn');
+                        if (closeBtn) closeBtn.click();
+                    }
+                }
+                
+                // Ctrl+N para novo parâmetro
+                if (e.ctrlKey && e.key === 'n') {
+                    e.preventDefault();
+                    document.getElementById('add-param-btn').click();
+                }
+                
+                // Ctrl+F para focar na busca
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    document.getElementById('search-box').focus();
+                }
+            });
+            
+            // Melhorar contraste para usuários com deficiência visual
+            const mediaQuery = window.matchMedia('(prefers-contrast: high)');
+            if (mediaQuery.matches) {
+                document.body.classList.add('high-contrast');
+            }
+            
+            // Respeitar preferência de movimento reduzido
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            if (reduceMotion.matches) {
+                document.body.classList.add('reduce-motion');
+            }
+        });
+    </script>
+
+    <!-- Estilos adicionais para acessibilidade -->
+    <style>
+        /* Alto contraste */
+        .high-contrast {
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        /* Movimento reduzido */
+        .reduce-motion * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+        
+        /* Melhor foco para teclado */
+        *:focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        /* Indicador de carregamento mais acessível */
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: "Carregando...";
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        
+        /* Melhor indicação de elementos interativos */
+        button, .btn, input[type="checkbox"], select {
+            cursor: pointer;
+        }
+        
+        button:disabled, .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* Indicação visual para links e botões */
+        .btn:focus, button:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Melhor contraste para placeholders */
+        ::placeholder {
+            color: var(--text-tertiary);
+            opacity: 1;
+        }
+        
+        /* Indicação de campos obrigatórios */
+        .form-group label::after {
+            content: "";
+        }
+        
+        .form-group label:has(~ input[required])::after,
+        .form-group label:has(~ textarea[required])::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+    </style>
+</body>
+</html>
